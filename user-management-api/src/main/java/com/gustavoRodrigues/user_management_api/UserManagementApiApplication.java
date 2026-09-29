@@ -1,4 +1,4 @@
-package com.gustavoRodrigues.user_management_api;
+package com.gustavorodrigues.user_management_api;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

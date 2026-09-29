@@ -1,0 +1,13 @@
+services:
+  postgres: postgres:16-alpine
+  container_name: teste-tecnico-pst
+  restart: unless-stopped
+  environment:
+    POSTGRES_DB: teste_tecnico
+    POSTGRES_PASSWORD: dellavolpe
+    POSTGRES_USER: dellavolpe
+  
+  ports:
+    - "5432:5432"
+  volumes:
+    - postgres_data:/var/lib/postgresql/data
