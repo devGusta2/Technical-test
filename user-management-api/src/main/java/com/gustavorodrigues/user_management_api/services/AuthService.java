@@ -1,6 +1,7 @@
 package com.gustavorodrigues.user_management_api.services;
 
 import java.time.Instant;
+import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.gustavorodrigues.user_management_api.dto.LoginRequestDto;
 import com.gustavorodrigues.user_management_api.dto.LoginResponseDto;
+import com.gustavorodrigues.user_management_api.model.Role;
 
 @Service 
 public class AuthService {
@@ -37,12 +39,14 @@ public class AuthService {
         }
         var expiresIn = 300L;
         var now = Instant.now();
-
+        var scopes = user.get().getRoles().stream().map(Role::getName).collect(Collectors.joining(" "));
+            
         var claims =  JwtClaimsSet.builder()
             .issuer("ApiTecnicalTest")
             .subject(user.get().getId().toString())
             .issuedAt(now)
             .expiresAt(now.plusSeconds(expiresIn))
+            .claim("scope", scopes)
             .build();
 
         var jwtValue = jwtEncoder.encode(JwtEncoderParameters.from(claims));

@@ -31,7 +31,7 @@ public class AdminUserConfig implements CommandLineRunner {
         var adminEmail = "admin@dellavolpe.com";
         if (userServices.fetchByEmail(adminEmail).isEmpty()) {
             var admin = new UserDto("admin", adminEmail, "123", "11111111111");
-            userServices.createUser(admin, adminRole);
+            userServices.createAdminUser(admin, adminRole);
         }
     }
 }

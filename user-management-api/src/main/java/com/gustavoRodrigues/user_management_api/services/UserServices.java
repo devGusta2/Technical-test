@@ -4,14 +4,12 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.gustavorodrigues.user_management_api.controller.UserController;
+import com.gustavorodrigues.user_management_api.dto.CreateUserDto;
 import com.gustavorodrigues.user_management_api.dto.UserDto;
-
 import com.gustavorodrigues.user_management_api.enums.RoleEnum;
 import com.gustavorodrigues.user_management_api.model.Role;
 import com.gustavorodrigues.user_management_api.model.User;
@@ -22,10 +20,12 @@ public class UserServices {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder;
+    private final RoleService roleService;
 
-    public UserServices(UserRepository userRepository, BCryptPasswordEncoder encoder) {
+    public UserServices(UserRepository userRepository,BCryptPasswordEncoder encoder,RoleService roleService) {
         this.userRepository = userRepository;
         this.encoder = encoder;
+        this.roleService = roleService;
     }
 
     public Optional<User> fetchByEmail(String email) {
@@ -34,29 +34,62 @@ public class UserServices {
 
     public User findByEmail(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Credenciais inválidas!"));
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Credenciais inválidas!"
+                        ));
     }
 
-    public User createUser(UserDto dto, Role role) {
-        User u = new User();
-
-        u.setName(dto.name());
-        u.setEmail(dto.email());
-        u.setPhone(dto.phone());
-        u.setPassword(encoder.encode(dto.password()));
-        u.setActive(true);
-        u.setRoles(Set.of(role));
-        u.setRole(RoleEnum.valueOf(role.getName()));
-
-        return userRepository.save(u);
+    public User createUser(CreateUserDto dto, Role role) {
+        return saveUser(
+                dto.name(),
+                dto.email(),
+                dto.phone(),
+                dto.password(),
+                role
+        );
     }
 
-    // public User createUser(UserDto dto){
-    // var pas = encoder.encode(dto.password());
+    public User createAdminUser(UserDto dto, Role role) {
+        return saveUser(
+                dto.name(),
+                dto.email(),
+                dto.phone(),
+                dto.password(),
+                role
+        );
+    }
 
-    // User u = new User(dto.email(), pas, dto.name(), dto.phone(), Role.USER);
+    public User createCommonUser(CreateUserDto dto) {
+        Role role = roleService.findOrCreate("USER");
 
-    // return u;
-    // }
+        return saveUser(
+                dto.name(),
+                dto.email(),
+                dto.phone(),
+                dto.password(),
+                role
+        );
+    }
 
+    private User saveUser(
+            String name,
+            String email,
+            String phone,
+            String password,
+            Role role) {
+
+        User user = new User();
+
+        user.setName(name);
+        user.setEmail(email);
+        user.setPhone(phone);
+        user.setPassword(encoder.encode(password));
+        user.setActive(true);
+        user.setRoles(Set.of(role));
+        user.setRole(RoleEnum.valueOf(role.getName()));
+
+        return userRepository.save(user);
+    }
 }
