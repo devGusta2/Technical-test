@@ -24,7 +24,6 @@ public abstract class Auditable {
     @CreatedDate 
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
     @CreatedBy 
     private UUID createdBy;
 

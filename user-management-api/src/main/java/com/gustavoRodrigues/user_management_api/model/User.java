@@ -51,7 +51,7 @@ public class User extends Auditable {
     @OneToMany(mappedBy = "user")
     private Set<Address> address = new HashSet<>();
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "tb_users_roles",joinColumns =  @JoinColumn(name = "user_id"),inverseJoinColumns = @JoinColumn(name = "role_id"))
     @Column(nullable = false)
     private Set<Role> roles;
