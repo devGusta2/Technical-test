@@ -1,8 +1,8 @@
 package com.gustavorodrigues.user_management_api.dto;
 
 public record UserDto(
-    String nome,
+    String name,
     String email,
     String password,
-    String telefone
+    String phone
 ){}
