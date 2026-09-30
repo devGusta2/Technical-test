@@ -10,7 +10,7 @@ import com.gustavorodrigues.user_management_api.dto.LoginRequestDto;
 import com.gustavorodrigues.user_management_api.dto.LoginResponseDto;
 import com.gustavorodrigues.user_management_api.services.AuthService;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController 
 @RequestMapping("/auth") 
