@@ -15,17 +15,22 @@ import com.gustavorodrigues.user_management_api.model.Role;
 import com.gustavorodrigues.user_management_api.model.User;
 import com.gustavorodrigues.user_management_api.repository.UserRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class UserServices {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder;
     private final RoleService roleService;
+    private final AddresService addresService;
 
-    public UserServices(UserRepository userRepository,BCryptPasswordEncoder encoder,RoleService roleService) {
+    public UserServices(UserRepository userRepository, BCryptPasswordEncoder encoder, RoleService roleService,
+            AddresService addresService) {
         this.userRepository = userRepository;
         this.encoder = encoder;
         this.roleService = roleService;
+        this.addresService = addresService;
     }
 
     public Optional<User> fetchByEmail(String email) {
@@ -61,16 +66,22 @@ public class UserServices {
         );
     }
 
+    @Transactional 
     public User createCommonUser(CreateUserDto dto) {
         Role role = roleService.findOrCreate("USER");
 
-        return saveUser(
+        User user = saveUser(
                 dto.name(),
                 dto.email(),
                 dto.phone(),
                 dto.password(),
                 role
         );
+
+        if(dto.endereco() != null){
+            dto.endereco().forEach(e -> addresService.createAddres(e, user));
+        }
+        return  user;
     }
 
     private User saveUser(

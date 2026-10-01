@@ -10,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.gustavorodrigues.user_management_api.dto.CreateEnderecoDto;
 import com.gustavorodrigues.user_management_api.dto.EnderecoResponseDto;
 import com.gustavorodrigues.user_management_api.model.Address;
+import com.gustavorodrigues.user_management_api.model.User;
 import com.gustavorodrigues.user_management_api.repository.AddressRepository;
 
 import jakarta.transaction.Transactional;
@@ -24,7 +25,7 @@ public class AddresService {
     }
 
     @Transactional
-    public Address createAddres(CreateEnderecoDto dto) {
+    public Address createAddres(CreateEnderecoDto dto, User user) {
         Address address = new Address();
         address.setCep(dto.cep());
         address.setStreet(dto.rua());
@@ -34,6 +35,7 @@ public class AddresService {
         address.setCity(dto.cidade());
         address.setNeighborhood(dto.bairro());
         address.setMain(dto.principal());
+        address.setUser(user);
         return addressRepository.save(address);
     }
 
