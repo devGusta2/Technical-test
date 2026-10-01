@@ -37,7 +37,7 @@ public class AuthService {
         if(!passwordEncoder.matches(dto.password(), user.get().getPassword())){
             throw new BadCredentialsException("Credenciais inválidas");
         }
-        var expiresIn = 300L;
+        var expiresIn = 1000L;
         var now = Instant.now();
         var scopes = user.get().getRoles().stream().map(Role::getName).collect(Collectors.joining(" "));
             
