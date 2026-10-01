@@ -8,6 +8,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.gustavorodrigues.user_management_api.dto.CreateEnderecoDto;
 import com.gustavorodrigues.user_management_api.dto.CreateUserDto;
 import com.gustavorodrigues.user_management_api.dto.UserDto;
 import com.gustavorodrigues.user_management_api.dto.UserResponseDto;
@@ -65,6 +66,14 @@ public class UserServices {
 
     @Transactional
     public UserResponseDto createCommonUser(CreateUserDto dto) {
+        if (dto.endereco() != null) {
+            long p = dto.endereco().stream().filter(CreateEnderecoDto::principal).count(); // quantidade de endereços
+                                                                                           // principais
+            if (p > 1) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "O usuário pode ter apenas um endereço principal!");
+            }
+        }
         Role role = roleService.findOrCreate("USER");
 
         User user = saveUser(
