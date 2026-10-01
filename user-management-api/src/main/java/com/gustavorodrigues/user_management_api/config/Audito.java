@@ -9,7 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AuditorAwareImpl implements AuditorAware<UUID> {
+public class Audito implements AuditorAware<UUID> {
 
     @Override
     public Optional<UUID> getCurrentAuditor() {
