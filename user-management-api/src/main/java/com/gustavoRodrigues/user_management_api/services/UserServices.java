@@ -10,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.gustavorodrigues.user_management_api.dto.CreateUserDto;
 import com.gustavorodrigues.user_management_api.dto.UserDto;
+import com.gustavorodrigues.user_management_api.dto.UserResponseDto;
 import com.gustavorodrigues.user_management_api.enums.RoleEnum;
 import com.gustavorodrigues.user_management_api.model.Role;
 import com.gustavorodrigues.user_management_api.model.User;
@@ -39,11 +40,9 @@ public class UserServices {
 
     public User findByEmail(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Credenciais inválidas!"
-                        ));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Credenciais inválidas!"));
     }
 
     public User createUser(CreateUserDto dto, Role role) {
@@ -52,8 +51,7 @@ public class UserServices {
                 dto.email(),
                 dto.phone(),
                 dto.password(),
-                role
-        );
+                role);
     }
 
     public User createAdminUser(UserDto dto, Role role) {
@@ -62,12 +60,11 @@ public class UserServices {
                 dto.email(),
                 dto.phone(),
                 dto.password(),
-                role
-        );
+                role);
     }
 
-    @Transactional 
-    public User createCommonUser(CreateUserDto dto) {
+    @Transactional
+    public UserResponseDto createCommonUser(CreateUserDto dto) {
         Role role = roleService.findOrCreate("USER");
 
         User user = saveUser(
@@ -75,13 +72,12 @@ public class UserServices {
                 dto.email(),
                 dto.phone(),
                 dto.password(),
-                role
-        );
+                role);
 
-        if(dto.endereco() != null){
+        if (dto.endereco() != null) {
             dto.endereco().forEach(e -> addresService.createAddres(e, user));
         }
-        return  user;
+        return toResponse(user);
     }
 
     private User saveUser(
@@ -103,4 +99,19 @@ public class UserServices {
 
         return userRepository.save(user);
     }
+
+    private UserResponseDto toResponse(User user) {
+        return new UserResponseDto(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getPhone(),
+                user.getRole(),
+                user.isActive(),
+                user.getAddress()
+                        .stream()
+                        .map(addresService::toResponse)
+                        .toList());
+    }
+
 }

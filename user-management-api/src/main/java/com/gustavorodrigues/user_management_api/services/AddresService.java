@@ -36,6 +36,7 @@ public class AddresService {
         address.setNeighborhood(dto.bairro());
         address.setMain(dto.principal());
         address.setUser(user);
+        user.getAddress().add(address);
         return addressRepository.save(address);
     }
 
@@ -78,7 +79,7 @@ public class AddresService {
         return ad;
     }
 
-    private EnderecoResponseDto toResponse(Address address) {
+    public EnderecoResponseDto toResponse(Address address) {
         return new EnderecoResponseDto(
                 address.getId(),
                 address.getCep(),
@@ -90,5 +91,6 @@ public class AddresService {
                 address.getNeighborhood(),
                 address.isMain());
     }
+
 
 }
