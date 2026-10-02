@@ -2,6 +2,7 @@ package com.gustavorodrigues.user_management_api.services;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -67,13 +68,14 @@ public class UserServices {
     @Transactional
     public UserResponseDto createCommonUser(CreateUserDto dto) {
         if (dto.endereco() != null) {
-            long p = dto.endereco().stream().filter(CreateEnderecoDto::principal).count(); // quantidade de endereços
-                                                                                           // principais
+            long p = dto.endereco().stream().filter(CreateEnderecoDto::principal).count(); // quantidade de endereços principais
             if (p > 1) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "O usuário pode ter apenas um endereço principal!");
             }
         }
+
+      
         Role role = roleService.findOrCreate("USER");
 
         User user = saveUser(
@@ -107,6 +109,16 @@ public class UserServices {
         user.setRole(RoleEnum.valueOf(role.getName()));
 
         return userRepository.save(user);
+    }
+
+    public User deactivate(UUID id){
+        var user = findById(id);
+        user.setActive(false);
+        return userRepository.save(user);
+    }
+
+    public User findById(UUID id){
+        return userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     private UserResponseDto toResponse(User user) {

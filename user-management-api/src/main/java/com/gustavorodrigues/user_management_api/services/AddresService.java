@@ -79,6 +79,13 @@ public class AddresService {
         return ad;
     }
 
+    public Address deactivate(UUID id){
+        Address ad = findById(id);
+        ad.setActive(false);
+        return addressRepository.save(ad);
+    }
+
+
     public EnderecoResponseDto toResponse(Address address) {
         return new EnderecoResponseDto(
                 address.getId(),
