@@ -108,8 +108,6 @@ class AuthServiceTest {
         user.setPassword("123456");
         user.setRoles(Set.of(role));
 
-        Jwt jwt = mock(Jwt.class);
-
         when(userServices.fetchByEmail(user.getEmail()))
             .thenReturn(Optional.of(user));
 
