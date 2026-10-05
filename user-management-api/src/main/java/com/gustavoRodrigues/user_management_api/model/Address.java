@@ -24,7 +24,7 @@ public class Address extends Auditable{
     private UUID id;
 
     private boolean main;
-    private boolean isActive;
+    private boolean isActive = true;
 
     //atribtos do pdf
     @Column(nullable = false)

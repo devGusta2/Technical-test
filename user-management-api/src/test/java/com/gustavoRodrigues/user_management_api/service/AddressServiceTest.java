@@ -16,68 +16,77 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-
+import com.gustavorodrigues.user_management_api.client.viacep.ViaCepCliente;
 import com.gustavorodrigues.user_management_api.dto.CreateEnderecoDto;
+import com.gustavorodrigues.user_management_api.dto.viacep.ViaCepResponse;
 import com.gustavorodrigues.user_management_api.model.Address;
 import com.gustavorodrigues.user_management_api.model.User;
 import com.gustavorodrigues.user_management_api.repository.AddressRepository;
 import com.gustavorodrigues.user_management_api.services.AddresService;
-import com.gustavorodrigues.user_management_api.services.UserServices;
+
 
 @ExtendWith(MockitoExtension.class)
 public class AddressServiceTest {
-    
 
-    @Mock 
+    @Mock
     private AddressRepository addressRepository;
 
     @Mock 
-    private UserServices userServices;
+    private ViaCepCliente viaCepCliente;
+   
 
-    @InjectMocks 
+    @InjectMocks
     private AddresService addresService;
 
+    @Test
+    void cadastrarEndereco() {
 
-    @Test 
-    void cadastrarEndereco(){
-        CreateEnderecoDto dto = new CreateEnderecoDto("111111111",
-         "Rua endereço", 
-         "122", 
-         " ", 
-         "SP", 
-         "SP", 
-         "Jaridm São Paulo",
-        true);
-        
+        CreateEnderecoDto dto = new CreateEnderecoDto(
+                "11111111",
+                "122",
+                " ",
+                true);
+
         User user = new User();
 
+        ViaCepResponse viaCepResponse = new ViaCepResponse(
+                "11111111",
+                "Rua endereço",
+                "",
+                "Jardim São Paulo",
+                "São Paulo",
+                "SP",
+                false);
+
+        when(viaCepCliente.fetchCEP("11111111"))
+                .thenReturn(viaCepResponse);
+
         when(addressRepository.save(any(Address.class)))
-            .thenAnswer(end -> end.getArgument(0));
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         Address ad = addresService.createAddres(dto, user);
 
-        assertEquals("111111111", ad.getCep());
+        assertEquals("11111111", ad.getCep());
         assertEquals("Rua endereço", ad.getStreet());
         assertEquals(" ", ad.getComplement());
         assertEquals("SP", ad.getState());
-        assertEquals("SP", ad.getCity());
-        assertEquals("Jaridm São Paulo", ad.getNeighborhood());
+        assertEquals("São Paulo", ad.getCity());
+        assertEquals("Jardim São Paulo", ad.getNeighborhood());
         assertTrue(ad.isMain());
 
+        verify(viaCepCliente).fetchCEP("11111111");
         verify(addressRepository).save(ad);
-
     }
 
-
-    @Test 
-    void deveDesativarEndereco(){
+    @Test
+    void deveDesativarEndereco() {
         UUID id = UUID.randomUUID();
         Address ad = new Address();
         ad.setId(id);
         ad.setActive(true);
 
         when(addressRepository.findById(id))
-            .thenReturn(Optional.of(ad));
+                .thenReturn(Optional.of(ad));
 
         addresService.deactivate(id);
         assertFalse(ad.isActive());

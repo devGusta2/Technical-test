@@ -1,5 +1,6 @@
 package com.gustavorodrigues.user_management_api.services;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -89,6 +90,13 @@ public class UserServices {
             dto.endereco().forEach(e -> addresService.createAddres(e, user));
         }
         return toResponse(user);
+    }
+
+    public List<UserResponseDto> listAll(){
+        List<User> list = userRepository.findAll();
+        return list.stream()
+        .map(
+            this::toResponse).toList();
     }
 
     private User saveUser(

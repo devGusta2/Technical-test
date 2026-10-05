@@ -1,6 +1,9 @@
 package com.gustavorodrigues.user_management_api.controller;
 
+import java.util.List;
+
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,5 +35,10 @@ public class UserController {
 
     /// List
      
+    @GetMapping("/list")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
+    public List<UserResponseDto> listUser(){
+        return userServices.listAll();
+    }
 
 }
