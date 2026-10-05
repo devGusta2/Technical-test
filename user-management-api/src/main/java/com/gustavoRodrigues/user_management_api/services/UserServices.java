@@ -171,6 +171,10 @@ public class UserServices {
         return toResponse(userRepository.save(user));
     }
 
+    public UserResponseDto findByid(UUID id){
+        return toResponse(findById(id));
+    }
+
     public User findById(UUID id){
         return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("Usuário não encontrado!"));
     }
