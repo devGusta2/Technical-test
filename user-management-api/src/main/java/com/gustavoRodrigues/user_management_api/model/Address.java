@@ -28,7 +28,6 @@ public class Address extends Auditable{
 
     //atribtos do pdf
     @Column(nullable = false)
-    @Pattern(regexp = "\\d{8}", message = "Cep deve conter 8 dígitos.")
     private String cep;
     @Column(nullable = false)
     private String street;
