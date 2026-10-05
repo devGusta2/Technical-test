@@ -119,10 +119,10 @@ public class UserServices {
         return userRepository.save(user);
     }
 
-    public User deactivate(UUID id){
+    public UserResponseDto deactivate(UUID id){
         var user = findById(id);
         user.setActive(false);
-        return userRepository.save(user);
+        return toResponse(userRepository.save(user));
     }
 
     public User findById(UUID id){
