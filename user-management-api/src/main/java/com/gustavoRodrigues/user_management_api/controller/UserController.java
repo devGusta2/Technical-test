@@ -20,44 +20,46 @@ import com.gustavorodrigues.user_management_api.services.UserServices;
 
 import org.springframework.web.bind.annotation.RequestBody;
 
-
-@RestController 
-@RequestMapping ("api/v1/users")
+@RestController
+@RequestMapping("api/v1/users")
 public class UserController {
-    
+
     private final UserServices userServices;
-    
 
     public UserController(UserServices userServices) {
         this.userServices = userServices;
     }
-    //cria r novo usuario
+
+    // cria r novo usuario
     @PostMapping("/create")
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
-    public UserResponseDto createUser(@RequestBody  CreateUserDto dto){
+    public UserResponseDto createUser(@RequestBody CreateUserDto dto) {
         return userServices.createCommonUser(dto);
-    }   
+    }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN') or has")
     public UserResponseDto updateUser(@PathVariable UUID id, @Valid @RequestBody UpdateUserDto dto) {
         return userServices.updateUser(id, dto);
     }
 
-
     /// List
-     
+
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
-    public List<UserResponseDto> listUser(){
+    public List<UserResponseDto> listUser() {
         return userServices.listAll();
     }
 
-
     @PatchMapping("/{id}/deactivate")
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
-    public UserResponseDto deactivate(@PathVariable UUID id){
+    public UserResponseDto deactivate(@PathVariable UUID id) {
         return userServices.deactivate(id);
     }
 
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN') or #id.toString() == authentication.name")
+    public UserResponseDto findById(@PathVariable UUID id) {
+        return userServices.findByid(id);
+    }
 }

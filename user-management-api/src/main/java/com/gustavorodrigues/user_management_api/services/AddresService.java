@@ -3,9 +3,7 @@ package com.gustavorodrigues.user_management_api.services;
 import java.util.List;
 import java.util.UUID;
 
-
 import org.springframework.stereotype.Service;
-
 
 import com.gustavorodrigues.user_management_api.Exceptions.AddresNotFoundException;
 import com.gustavorodrigues.user_management_api.Exceptions.InvalidCepException;
@@ -53,7 +51,7 @@ public class AddresService {
     }
 
     public List<EnderecoResponseDto> listAddress() {
-        return addressRepository.findAll()
+        return addressRepository.findByActiveTrue()
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -84,13 +82,13 @@ public class AddresService {
 
     // @Transactional
     // public Address deleteAddres(UUID id) {
-    //     var ad = findById(id);
-    //     ad.setActive(false);
-    //     return addressRepository.save(ad);
+    // var ad = findById(id);
+    // ad.setActive(false);
+    // return addressRepository.save(ad);
     // }
 
     private Address findById(UUID id) {
-        Address ad = addressRepository.findById(id)
+        Address ad = addressRepository.findByIdAndActiveTrue(id)
                 .orElseThrow(() -> new AddresNotFoundException("Endereço não encontrado!"));
         return ad;
     }
@@ -137,6 +135,18 @@ public class AddresService {
         }
 
         return cep.replaceAll("\\D", "");
+    }
+
+    public void setAsMain(Address address) {
+        addressRepository
+                .findByUserIdAndMainTrueAndActiveTrue(address.getUser().getId())
+                .ifPresent(currentMain -> {
+                    if (!currentMain.getId().equals(address.getId())) {
+                        currentMain.setMain(false);
+                    }
+                });
+
+        address.setMain(true);
     }
 
 }
