@@ -38,8 +38,11 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasAuthority('SCOPE_ADMIN') or has")
-    public UserResponseDto updateUser(@PathVariable UUID id, @Valid @RequestBody UpdateUserDto dto) {
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN') or #id.toString() == authentication.name")
+    public UserResponseDto updateUser(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateUserDto dto) {
+
         return userServices.updateUser(id, dto);
     }
 
