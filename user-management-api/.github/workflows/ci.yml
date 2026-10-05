@@ -1,4 +1,4 @@
-name: Ci tecnical test ${{github.event.repository.name}}
+name: Ci tecnicaltest ${{github.event.repository.name}}
 on:
   push:
     branches: [main, develop, ci/github-actions-pipeline]
