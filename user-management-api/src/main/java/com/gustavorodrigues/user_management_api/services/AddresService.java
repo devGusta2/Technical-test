@@ -42,8 +42,13 @@ public class AddresService {
         address.setState(viaCep.uf());
         address.setCity(viaCep.localidade());
         address.setNeighborhood(viaCep.bairro());
-        address.setMain(dto.principal());
         address.setUser(user);
+
+        if (dto.principal()) {
+            setAsMain(address);
+        } else {
+            address.setMain(false);
+        }
 
         user.getAddress().add(address);
 
@@ -60,7 +65,7 @@ public class AddresService {
     @Transactional
     public Address updateAddress(CreateEnderecoDto dto, UUID id) {
 
-        var address = findById(id);
+        Address address = findById(id);
 
         ViaCepResponse viaCep = buscarCep(dto.cep());
 
@@ -71,9 +76,15 @@ public class AddresService {
         address.setState(viaCep.uf());
         address.setCity(viaCep.localidade());
         address.setNeighborhood(viaCep.bairro());
-        address.setMain(dto.principal());
 
-        return address;
+        if (dto.principal()) {
+            setAsMain(address);
+
+        } else {
+            address.setMain(false);
+        }
+
+        return addressRepository.save(address);
     }
 
     public EnderecoResponseDto fetchById(UUID id) {
@@ -143,6 +154,7 @@ public class AddresService {
                 .ifPresent(currentMain -> {
                     if (!currentMain.getId().equals(address.getId())) {
                         currentMain.setMain(false);
+                        addressRepository.save(currentMain);
                     }
                 });
 

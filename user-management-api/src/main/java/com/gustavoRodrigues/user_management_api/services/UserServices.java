@@ -127,10 +127,8 @@ public class UserServices {
                 throw new BussinesException("O usuário deve ter somente um enderço principal!");
             }
 
-            boolean assigningMain = mainCount == 1;
-            if (assigningMain) {
-                user.getAddress().forEach(address -> address.setMain(false));
-            }
+      
+   
 
             for (UpdateEnderecoDto addressDto : dto.endereco()) {
                 if (addressDto.id() == null) {
