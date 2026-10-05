@@ -13,13 +13,17 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     container_name: user-management-api
     restart: unless-stopped
     environment:
       JWT_PRIVATE_KEY_PATH: /app/secrets/private.key
     volumes:
       - C:/Users/gugui/secrets/private.key:/app/secrets/private.key:ro
+      - .:/app
+      - maven_cache:/root/.m2
     depends_on:
       - postgres
     ports:
@@ -27,3 +31,4 @@ services:
 
 volumes:
   postgres_data:
+  maven_cache:

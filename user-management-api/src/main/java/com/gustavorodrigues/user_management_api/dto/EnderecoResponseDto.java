@@ -1,7 +1,9 @@
 package com.gustavorodrigues.user_management_api.dto;
 
+import java.util.UUID;
+
 public record EnderecoResponseDto(
-        Long id,
+        UUID id,
         String cep,
         String rua,
         String numero,
@@ -9,6 +11,6 @@ public record EnderecoResponseDto(
         String estado,
         String cidade,
         String bairro,
-        Boolean principal
+        boolean principal
 ) {
 }
