@@ -5,11 +5,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
-
+import com.gustavorodrigues.user_management_api.Exceptions.AddresNotFoundException;
+import com.gustavorodrigues.user_management_api.Exceptions.BussinesException;
+import com.gustavorodrigues.user_management_api.Exceptions.CredentialsException;
+import com.gustavorodrigues.user_management_api.Exceptions.EmailAlreadExistsEception;
+import com.gustavorodrigues.user_management_api.Exceptions.UserNotFoundException;
 import com.gustavorodrigues.user_management_api.dto.CreateEnderecoDto;
 import com.gustavorodrigues.user_management_api.dto.CreateUserDto;
 import com.gustavorodrigues.user_management_api.dto.UserDto;
@@ -43,12 +45,10 @@ public class UserServices {
         return userRepository.findByEmail(email);
     }
 
-    public User findByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Credenciais inválidas!"));
-    }
+ public User findByEmail(String email) {
+    return userRepository.findByEmail(email)
+            .orElseThrow(() -> new CredentialsException("Credenciais inválidas"));
+}
 
     public User createUser(CreateUserDto dto, Role role) {
         return saveUser(
@@ -73,8 +73,7 @@ public class UserServices {
         if (dto.endereco() != null) {
             long p = dto.endereco().stream().filter(CreateEnderecoDto::principal).count(); // quantidade de endereços principais
             if (p > 1) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "O usuário pode ter apenas um endereço principal!");
+                throw new BussinesException("O usuário deve ter somente um enderço principal!");
             }
         }
 
@@ -107,7 +106,7 @@ public class UserServices {
 
         if (dto.email() != null && !dto.email().equals(user.getEmail())
                 && userRepository.existsByEmail(dto.email())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "E-mail já cadastrado!");
+            throw new EmailAlreadExistsEception("E-mail ja cadastrado!");
         }
 
         if (dto.name() != null) user.setName(dto.name());
@@ -120,8 +119,7 @@ public class UserServices {
         if (dto.endereco() != null) {
             long mainCount = dto.endereco().stream().filter(UpdateEnderecoDto::principal).count();
             if (mainCount > 1) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "O usuário pode ter apenas um endereço principal!");
+                throw new BussinesException("O usuário deve ter somente um enderço principal!");
             }
 
             boolean assigningMain = mainCount == 1;
@@ -137,8 +135,7 @@ public class UserServices {
                     var address = user.getAddress().stream()
                             .filter(current -> current.getId().equals(addressDto.id()))
                             .findFirst()
-                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                    "Endereço não encontrado para este usuário!"));
+                            .orElseThrow(() -> new AddresNotFoundException("Endereço não encontrado!"));
                     addresService.updateAddress(new CreateEnderecoDto(
                             addressDto.cep(), addressDto.numero(), addressDto.complemento(), addressDto.principal()), address.getId());
                 }
@@ -175,7 +172,7 @@ public class UserServices {
     }
 
     public User findById(UUID id){
-        return userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("Usuário não encontrado!"));
     }
 
     private UserResponseDto toResponse(User user) {

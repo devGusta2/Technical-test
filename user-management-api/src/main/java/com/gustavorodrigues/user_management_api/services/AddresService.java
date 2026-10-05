@@ -3,10 +3,12 @@ package com.gustavorodrigues.user_management_api.services;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
+import org.springframework.stereotype.Service;
+
+
+import com.gustavorodrigues.user_management_api.Exceptions.AddresNotFoundException;
+import com.gustavorodrigues.user_management_api.Exceptions.InvalidCepException;
 import com.gustavorodrigues.user_management_api.client.viacep.ViaCepCliente;
 import com.gustavorodrigues.user_management_api.dto.CreateEnderecoDto;
 import com.gustavorodrigues.user_management_api.dto.EnderecoResponseDto;
@@ -89,7 +91,7 @@ public class AddresService {
 
     private Address findById(UUID id) {
         Address ad = addressRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Endereço não encontrado!"));
+                .orElseThrow(() -> new AddresNotFoundException("Endereço não encontrado!"));
         return ad;
     }
 
@@ -117,13 +119,13 @@ public class AddresService {
         String cepNormal = normCep(cep);
 
         if (cepNormal.length() != 8) {
-            throw new IllegalArgumentException("CEP inválido");
+            throw new InvalidCepException("Cep inválido, o cep deve possuir 8 digitos!");
         }
 
         ViaCepResponse response = viaCepCliente.fetchCEP(cepNormal);
 
         if (Boolean.TRUE.equals(response.erro())) {
-            throw new IllegalArgumentException("CEP não encontrado");
+            throw new InvalidCepException("Cep inválido");
         }
 
         return response;
@@ -131,7 +133,7 @@ public class AddresService {
 
     private String normCep(String cep) {
         if (cep == null) {
-            throw new IllegalArgumentException("CEP inválido");
+            throw new InvalidCepException("CEP inválido");
         }
 
         return cep.replaceAll("\\D", "");
