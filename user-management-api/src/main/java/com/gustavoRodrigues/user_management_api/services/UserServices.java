@@ -14,6 +14,8 @@ import com.gustavorodrigues.user_management_api.dto.CreateEnderecoDto;
 import com.gustavorodrigues.user_management_api.dto.CreateUserDto;
 import com.gustavorodrigues.user_management_api.dto.UserDto;
 import com.gustavorodrigues.user_management_api.dto.UserResponseDto;
+import com.gustavorodrigues.user_management_api.dto.UpdateUserDto;
+import com.gustavorodrigues.user_management_api.dto.UpdateEnderecoDto;
 import com.gustavorodrigues.user_management_api.enums.RoleEnum;
 import com.gustavorodrigues.user_management_api.model.Role;
 import com.gustavorodrigues.user_management_api.model.User;
@@ -97,6 +99,53 @@ public class UserServices {
         return list.stream()
         .map(
             this::toResponse).toList();
+    }
+
+    @Transactional
+    public UserResponseDto updateUser(UUID id, UpdateUserDto dto) {
+        User user = findById(id);
+
+        if (dto.email() != null && !dto.email().equals(user.getEmail())
+                && userRepository.existsByEmail(dto.email())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "E-mail já cadastrado!");
+        }
+
+        if (dto.name() != null) user.setName(dto.name());
+        if (dto.email() != null) user.setEmail(dto.email());
+        if (dto.phone() != null) user.setPhone(dto.phone());
+        if (dto.password() != null && !dto.password().isBlank()) {
+            user.setPassword(encoder.encode(dto.password()));
+        }
+
+        if (dto.endereco() != null) {
+            long mainCount = dto.endereco().stream().filter(UpdateEnderecoDto::principal).count();
+            if (mainCount > 1) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "O usuário pode ter apenas um endereço principal!");
+            }
+
+            boolean assigningMain = mainCount == 1;
+            if (assigningMain) {
+                user.getAddress().forEach(address -> address.setMain(false));
+            }
+
+            for (UpdateEnderecoDto addressDto : dto.endereco()) {
+                if (addressDto.id() == null) {
+                    addresService.createAddres(new CreateEnderecoDto(
+                            addressDto.cep(), addressDto.numero(), addressDto.complemento(), addressDto.principal()), user);
+                } else {
+                    var address = user.getAddress().stream()
+                            .filter(current -> current.getId().equals(addressDto.id()))
+                            .findFirst()
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                    "Endereço não encontrado para este usuário!"));
+                    addresService.updateAddress(new CreateEnderecoDto(
+                            addressDto.cep(), addressDto.numero(), addressDto.complemento(), addressDto.principal()), address.getId());
+                }
+            }
+        }
+
+        return toResponse(userRepository.save(user));
     }
 
     private User saveUser(

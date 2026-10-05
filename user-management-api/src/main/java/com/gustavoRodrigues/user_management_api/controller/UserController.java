@@ -3,6 +3,8 @@ package com.gustavorodrigues.user_management_api.controller;
 import java.util.List;
 import java.util.UUID;
 
+import jakarta.validation.Valid;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gustavorodrigues.user_management_api.dto.CreateUserDto;
+import com.gustavorodrigues.user_management_api.dto.UpdateUserDto;
 import com.gustavorodrigues.user_management_api.dto.UserResponseDto;
 import com.gustavorodrigues.user_management_api.services.UserServices;
 
@@ -34,6 +37,12 @@ public class UserController {
     public UserResponseDto createUser(@RequestBody  CreateUserDto dto){
         return userServices.createCommonUser(dto);
     }   
+
+    @PatchMapping("/{id}")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
+    public UserResponseDto updateUser(@PathVariable UUID id, @Valid @RequestBody UpdateUserDto dto) {
+        return userServices.updateUser(id, dto);
+    }
 
 
     /// List
