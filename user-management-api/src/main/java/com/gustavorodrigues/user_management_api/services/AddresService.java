@@ -3,9 +3,7 @@ package com.gustavorodrigues.user_management_api.services;
 import java.util.List;
 import java.util.UUID;
 
-
 import org.springframework.stereotype.Service;
-
 
 import com.gustavorodrigues.user_management_api.Exceptions.AddresNotFoundException;
 import com.gustavorodrigues.user_management_api.Exceptions.InvalidCepException;
@@ -44,8 +42,13 @@ public class AddresService {
         address.setState(viaCep.uf());
         address.setCity(viaCep.localidade());
         address.setNeighborhood(viaCep.bairro());
-        address.setMain(dto.principal());
         address.setUser(user);
+
+        if (dto.principal()) {
+            setAsMain(address);
+        } else {
+            address.setMain(false);
+        }
 
         user.getAddress().add(address);
 
@@ -53,7 +56,7 @@ public class AddresService {
     }
 
     public List<EnderecoResponseDto> listAddress() {
-        return addressRepository.findAll()
+        return addressRepository.findByIsActiveTrue()
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -62,7 +65,7 @@ public class AddresService {
     @Transactional
     public Address updateAddress(CreateEnderecoDto dto, UUID id) {
 
-        var address = findById(id);
+        Address address = findById(id);
 
         ViaCepResponse viaCep = buscarCep(dto.cep());
 
@@ -73,9 +76,15 @@ public class AddresService {
         address.setState(viaCep.uf());
         address.setCity(viaCep.localidade());
         address.setNeighborhood(viaCep.bairro());
-        address.setMain(dto.principal());
 
-        return address;
+        if (dto.principal()) {
+            setAsMain(address);
+
+        } else {
+            address.setMain(false);
+        }
+
+        return addressRepository.save(address);
     }
 
     public EnderecoResponseDto fetchById(UUID id) {
@@ -84,13 +93,13 @@ public class AddresService {
 
     // @Transactional
     // public Address deleteAddres(UUID id) {
-    //     var ad = findById(id);
-    //     ad.setActive(false);
-    //     return addressRepository.save(ad);
+    // var ad = findById(id);
+    // ad.setActive(false);
+    // return addressRepository.save(ad);
     // }
 
     private Address findById(UUID id) {
-        Address ad = addressRepository.findById(id)
+        Address ad = addressRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new AddresNotFoundException("Endereço não encontrado!"));
         return ad;
     }
@@ -137,6 +146,19 @@ public class AddresService {
         }
 
         return cep.replaceAll("\\D", "");
+    }
+
+    public void setAsMain(Address address) {
+        addressRepository
+                .findByUserIdAndMainTrueAndIsActiveTrue(address.getUser().getId())
+                .ifPresent(currentMain -> {
+                    if (!currentMain.getId().equals(address.getId())) {
+                        currentMain.setMain(false);
+                        addressRepository.save(currentMain);
+                    }
+                });
+
+        address.setMain(true);
     }
 
 }

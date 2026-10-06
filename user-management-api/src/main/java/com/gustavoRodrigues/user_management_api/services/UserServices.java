@@ -1,10 +1,11 @@
 package com.gustavorodrigues.user_management_api.services;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.gustavorodrigues.user_management_api.Exceptions.AddresNotFoundException;
@@ -19,6 +20,7 @@ import com.gustavorodrigues.user_management_api.dto.UserResponseDto;
 import com.gustavorodrigues.user_management_api.dto.UpdateUserDto;
 import com.gustavorodrigues.user_management_api.dto.UpdateEnderecoDto;
 import com.gustavorodrigues.user_management_api.enums.RoleEnum;
+import com.gustavorodrigues.user_management_api.model.Address;
 import com.gustavorodrigues.user_management_api.model.Role;
 import com.gustavorodrigues.user_management_api.model.User;
 import com.gustavorodrigues.user_management_api.repository.UserRepository;
@@ -45,10 +47,10 @@ public class UserServices {
         return userRepository.findByEmail(email);
     }
 
- public User findByEmail(String email) {
-    return userRepository.findByEmail(email)
-            .orElseThrow(() -> new CredentialsException("Credenciais inválidas"));
-}
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new CredentialsException("Credenciais inválidas"));
+    }
 
     public User createUser(CreateUserDto dto, Role role) {
         return saveUser(
@@ -71,13 +73,13 @@ public class UserServices {
     @Transactional
     public UserResponseDto createCommonUser(CreateUserDto dto) {
         if (dto.endereco() != null) {
-            long p = dto.endereco().stream().filter(CreateEnderecoDto::principal).count(); // quantidade de endereços principais
+            long p = dto.endereco().stream().filter(CreateEnderecoDto::principal).count(); // quantidade de endereços
+                                                                                           // principais
             if (p > 1) {
                 throw new BussinesException("O usuário deve ter somente um enderço principal!");
             }
         }
 
-      
         Role role = roleService.findOrCreate("USER");
 
         User user = saveUser(
@@ -93,12 +95,18 @@ public class UserServices {
         return toResponse(user);
     }
 
-    public List<UserResponseDto> listAll(){
-        List<User> list = userRepository.findAll();
-        return list.stream()
-        .map(
-            this::toResponse).toList();
-    }
+    public Page<UserResponseDto> listAll(
+        String name,
+        String email,
+        Pageable pageable) {
+
+    Page<User> page = userRepository.findActiveUsers(
+            name,
+            email,
+            pageable);
+
+    return page.map(this::toResponse);
+}
 
     @Transactional
     public UserResponseDto updateUser(UUID id, UpdateUserDto dto) {
@@ -109,9 +117,12 @@ public class UserServices {
             throw new EmailAlreadExistsEception("E-mail ja cadastrado!");
         }
 
-        if (dto.name() != null) user.setName(dto.name());
-        if (dto.email() != null) user.setEmail(dto.email());
-        if (dto.phone() != null) user.setPhone(dto.phone());
+        if (dto.name() != null)
+            user.setName(dto.name());
+        if (dto.email() != null)
+            user.setEmail(dto.email());
+        if (dto.phone() != null)
+            user.setPhone(dto.phone());
         if (dto.password() != null && !dto.password().isBlank()) {
             user.setPassword(encoder.encode(dto.password()));
         }
@@ -122,27 +133,26 @@ public class UserServices {
                 throw new BussinesException("O usuário deve ter somente um enderço principal!");
             }
 
-            boolean assigningMain = mainCount == 1;
-            if (assigningMain) {
-                user.getAddress().forEach(address -> address.setMain(false));
-            }
-
             for (UpdateEnderecoDto addressDto : dto.endereco()) {
                 if (addressDto.id() == null) {
                     addresService.createAddres(new CreateEnderecoDto(
-                            addressDto.cep(), addressDto.numero(), addressDto.complemento(), addressDto.principal()), user);
+                            addressDto.cep(), addressDto.numero(), addressDto.complemento(), addressDto.principal()),
+                            user);
                 } else {
                     var address = user.getAddress().stream()
                             .filter(current -> current.getId().equals(addressDto.id()))
                             .findFirst()
                             .orElseThrow(() -> new AddresNotFoundException("Endereço não encontrado!"));
                     addresService.updateAddress(new CreateEnderecoDto(
-                            addressDto.cep(), addressDto.numero(), addressDto.complemento(), addressDto.principal()), address.getId());
+                            addressDto.cep(), addressDto.numero(), addressDto.complemento(), addressDto.principal()),
+                            address.getId());
                 }
             }
         }
 
-        return toResponse(userRepository.save(user));
+        userRepository.save(user);
+        userRepository.flush();
+        return toResponse(user);
     }
 
     private User saveUser(
@@ -151,6 +161,10 @@ public class UserServices {
             String phone,
             String password,
             Role role) {
+
+        if (userRepository.existsByEmail(email)) {
+            throw new EmailAlreadExistsEception("E-mail ja cadastrado!");
+        }
 
         User user = new User();
 
@@ -165,14 +179,24 @@ public class UserServices {
         return userRepository.save(user);
     }
 
-    public UserResponseDto deactivate(UUID id){
-        var user = findById(id);
+    @Transactional
+    public UserResponseDto deactivate(UUID id) {
+        User user = findById(id);
         user.setActive(false);
-        return toResponse(userRepository.save(user));
+        user.getAddress()
+                .forEach(address -> address.setActive(false));
+        userRepository.save(user);
+        userRepository.flush();
+        return toResponse(user);
     }
 
-    public User findById(UUID id){
-        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("Usuário não encontrado!"));
+    public UserResponseDto findByid(UUID id) {
+        return toResponse(findById(id));
+    }
+
+    public User findById(UUID id) {
+        return userRepository.findByIdAndIsActiveTrue(id)
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado!"));
     }
 
     private UserResponseDto toResponse(User user) {
@@ -185,8 +209,13 @@ public class UserServices {
                 user.isActive(),
                 user.getAddress()
                         .stream()
+                        .filter(Address::isActive)
                         .map(addresService::toResponse)
-                        .toList());
+                        .toList(),
+                user.getCreatedAt(),
+                user.getCreatedBy(),
+                user.getUpdatedAt(),
+                user.getUpdatedBy());
     }
 
 }

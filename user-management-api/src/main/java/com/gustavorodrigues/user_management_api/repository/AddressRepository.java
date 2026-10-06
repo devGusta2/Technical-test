@@ -12,11 +12,11 @@ import com.gustavorodrigues.user_management_api.model.Address;
 @Repository
 public interface AddressRepository extends JpaRepository<Address, UUID> {
 
-    List<Address> findByActiveTrue();
+    List<Address> findByIsActiveTrue();
 
-    List<Address> findByUserIdAndActiveTrue(UUID userId);
+    List<Address> findByUserIdAndIsActiveTrue(UUID userId);
 
-    Optional<Address> findByIdAndActiveTrue(UUID id);
+    Optional<Address> findByIdAndIsActiveTrue(UUID id);
 
-    Optional<Address> findByUserIdAndMainTrueAndActiveTrue(UUID userId);
+    Optional<Address> findByUserIdAndMainTrueAndIsActiveTrue(UUID userId);
 }
