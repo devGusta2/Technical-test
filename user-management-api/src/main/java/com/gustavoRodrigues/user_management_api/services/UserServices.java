@@ -151,7 +151,9 @@ public class UserServices {
             }
         }
 
-        return toResponse(userRepository.save(user));
+        userRepository.save(user);
+        userRepository.flush();
+        return toResponse(user);
     }
 
     private User saveUser(
@@ -185,6 +187,7 @@ public class UserServices {
         user.getAddress()
                 .forEach(address -> address.setActive(false));
         userRepository.save(user);
+        userRepository.flush();
         return toResponse(user);
     }
 
@@ -209,7 +212,11 @@ public class UserServices {
                         .stream()
                         .filter(Address::isActive)
                         .map(addresService::toResponse)
-                        .toList());
+                        .toList(),
+                user.getCreatedAt(),
+                user.getCreatedBy(),
+                user.getUpdatedAt(),
+                user.getUpdatedBy());
     }
 
 }

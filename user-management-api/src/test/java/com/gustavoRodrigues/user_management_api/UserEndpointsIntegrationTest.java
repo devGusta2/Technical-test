@@ -162,7 +162,11 @@ class UserEndpointsIntegrationTest {
         )
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.email").value(email))
-        .andExpect(jsonPath("$.active").value(true));
+        .andExpect(jsonPath("$.active").value(true))
+        .andExpect(jsonPath("$.createdAt").isNotEmpty())
+        .andExpect(jsonPath("$.createdBy").value(adminId))
+        .andExpect(jsonPath("$.updatedAt").isNotEmpty())
+        .andExpect(jsonPath("$.updatedBy").value(adminId));
 
         User created = userRepository.findByEmail(email)
                 .orElseThrow();
@@ -237,7 +241,10 @@ class UserEndpointsIntegrationTest {
         )
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.name").value("Nome Atualizado"))
-        .andExpect(jsonPath("$.phone").value("11888888888"));
+        .andExpect(jsonPath("$.phone").value("11888888888"))
+        .andExpect(jsonPath("$.createdAt").isNotEmpty())
+        .andExpect(jsonPath("$.updatedAt").isNotEmpty())
+        .andExpect(jsonPath("$.updatedBy").value(user.getId().toString()));
 
         User updated = userRepository.findById(user.getId())
                 .orElseThrow();
