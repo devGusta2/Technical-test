@@ -5,6 +5,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.gustavorodrigues.user_management_api.Exceptions.AddresNotFoundException;
@@ -94,13 +96,18 @@ public class UserServices {
         return toResponse(user);
     }
 
-    public List<UserResponseDto> listAll() {
-        List<User> list = userRepository.findAll();
-        return list.stream()
-                .map(
-                        this::toResponse)
-                .toList();
-    }
+    public Page<UserResponseDto> listAll(
+        String name,
+        String email,
+        Pageable pageable) {
+
+    Page<User> page = userRepository.findActiveUsers(
+            name,
+            email,
+            pageable);
+
+    return page.map(this::toResponse);
+}
 
     @Transactional
     public UserResponseDto updateUser(UUID id, UpdateUserDto dto) {
@@ -126,9 +133,6 @@ public class UserServices {
             if (mainCount > 1) {
                 throw new BussinesException("O usuário deve ter somente um enderço principal!");
             }
-
-      
-   
 
             for (UpdateEnderecoDto addressDto : dto.endereco()) {
                 if (addressDto.id() == null) {
@@ -185,7 +189,8 @@ public class UserServices {
     }
 
     public User findById(UUID id) {
-        return userRepository.findByIdAndActiveTrue(id).orElseThrow(() -> new UserNotFoundException("Usuário não encontrado!"));
+        return userRepository.findByIdAndActiveTrue(id)
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado!"));
     }
 
     private UserResponseDto toResponse(User user) {
