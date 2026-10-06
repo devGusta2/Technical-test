@@ -54,7 +54,7 @@ public class AuthService {
 
         var jwtValue = jwtEncoder.encode(JwtEncoderParameters.from(claims));
 
-        return ResponseEntity.ok(new LoginResponseDto(jwtValue.getTokenValue(), expiresIn));
+        return ResponseEntity.ok(new LoginResponseDto(jwtValue.getTokenValue(), expiresIn, user.get().getRole().name()));
 
     }
 
