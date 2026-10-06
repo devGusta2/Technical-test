@@ -161,6 +161,10 @@ public class UserServices {
             String password,
             Role role) {
 
+        if (userRepository.existsByEmail(email)) {
+            throw new EmailAlreadExistsEception("E-mail ja cadastrado!");
+        }
+
         User user = new User();
 
         user.setName(name);
@@ -189,7 +193,7 @@ public class UserServices {
     }
 
     public User findById(UUID id) {
-        return userRepository.findByIdAndActiveTrue(id)
+        return userRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado!"));
     }
 

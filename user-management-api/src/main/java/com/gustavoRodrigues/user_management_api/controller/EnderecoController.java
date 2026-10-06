@@ -18,8 +18,8 @@ import com.gustavorodrigues.user_management_api.model.User;
 import com.gustavorodrigues.user_management_api.services.AddresService;
 import com.gustavorodrigues.user_management_api.services.UserServices;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/api/v1/endereco")

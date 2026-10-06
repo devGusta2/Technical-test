@@ -26,10 +26,10 @@ public class AuthorizationServices {
         return UUID.fromString(authentication.getName());
     }
 
-    public boolean isOwnerAddress(UUID addresId, Authentication authentication) {
+    public boolean isOwnerOfAddress(UUID addresId, Authentication authentication) {
         UUID authenticatedUserId = getAuthenticatedUserId(authentication);
 
-        return addressRepository.findByIdAndActiveTrue(addresId)
+        return addressRepository.findByIdAndIsActiveTrue(addresId)
                 .map(ad -> ad.getUser().getId().equals(authenticatedUserId))
                 .orElse(false);
     }

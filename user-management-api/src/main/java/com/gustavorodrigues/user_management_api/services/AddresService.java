@@ -56,7 +56,7 @@ public class AddresService {
     }
 
     public List<EnderecoResponseDto> listAddress() {
-        return addressRepository.findByActiveTrue()
+        return addressRepository.findByIsActiveTrue()
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -99,7 +99,7 @@ public class AddresService {
     // }
 
     private Address findById(UUID id) {
-        Address ad = addressRepository.findByIdAndActiveTrue(id)
+        Address ad = addressRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new AddresNotFoundException("Endereço não encontrado!"));
         return ad;
     }
@@ -150,7 +150,7 @@ public class AddresService {
 
     public void setAsMain(Address address) {
         addressRepository
-                .findByUserIdAndMainTrueAndActiveTrue(address.getUser().getId())
+                .findByUserIdAndMainTrueAndIsActiveTrue(address.getUser().getId())
                 .ifPresent(currentMain -> {
                     if (!currentMain.getId().equals(address.getId())) {
                         currentMain.setMain(false);

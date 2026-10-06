@@ -38,7 +38,7 @@ public class UserController {
     // cria r novo usuario
     @PostMapping("/create")
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
-    public UserResponseDto createUser(@RequestBody CreateUserDto dto) {
+    public UserResponseDto createUser(@Valid @RequestBody CreateUserDto dto) {
         return userServices.createCommonUser(dto);
     }
 

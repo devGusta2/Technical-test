@@ -9,8 +9,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.gustavorodrigues.user_management_api.Exceptions.UserNotFoundException;
+import com.gustavorodrigues.user_management_api.Exceptions.EmailAlreadExistsEception;
 
 import com.gustavorodrigues.user_management_api.dto.CreateUserDto;
+import com.gustavorodrigues.user_management_api.dto.UpdateUserDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import java.util.List;
 import com.gustavorodrigues.user_management_api.model.Role;
 import com.gustavorodrigues.user_management_api.model.User;
 import com.gustavorodrigues.user_management_api.repository.UserRepository;
@@ -141,7 +147,7 @@ public class UserServiceTest {
                 user.setEmail("gustavo@gmail.com");
                 user.setActive(true);
 
-                when(userRepository.findByIdAndActiveTrue(id))
+                when(userRepository.findByIdAndIsActiveTrue(id))
                                 .thenReturn(Optional.of(user));
 
                 User resultd = userServices.findById(id);
@@ -150,14 +156,14 @@ public class UserServiceTest {
                 assertEquals("Gustavo", resultd.getName());
                 assertEquals("gustavo@gmail.com", resultd.getEmail());
 
-                verify(userRepository).findByIdAndActiveTrue(id);
+                verify(userRepository).findByIdAndIsActiveTrue(id);
         }
 
         @Test
         void execaoQuandoNaoExisteUsuario() {
                 UUID id = UUID.randomUUID();
 
-                when(userRepository.findByIdAndActiveTrue(id))
+                when(userRepository.findByIdAndIsActiveTrue(id))
                                 .thenReturn(Optional.empty());
 
                 UserNotFoundException exception = assertThrows(
@@ -166,7 +172,7 @@ public class UserServiceTest {
 
                 assertEquals("Usuário não encontrado!", exception.getMessage());
 
-                verify(userRepository).findByIdAndActiveTrue(id);
+                verify(userRepository).findByIdAndIsActiveTrue(id);
         }
 
         @Test
@@ -177,7 +183,7 @@ public class UserServiceTest {
                 user.setId(id);
                 user.setActive(true);
 
-                when(userRepository.findByIdAndActiveTrue(id))
+                when(userRepository.findByIdAndIsActiveTrue(id))
                                 .thenReturn(Optional.of(user));
 
                 when(userRepository.save(user))
@@ -187,8 +193,48 @@ public class UserServiceTest {
 
                 assertFalse(user.isActive());
 
-                verify(userRepository).findByIdAndActiveTrue(id);
+                verify(userRepository).findByIdAndIsActiveTrue(id);
                 verify(userRepository).save(user);
+        }
+
+        @Test
+        void deveRejeitarEmailDuplicadoNaAtualizacao() {
+                UUID id = UUID.randomUUID();
+                User user = new User();
+                user.setId(id);
+                user.setEmail("atual@email.com");
+                when(userRepository.findByIdAndIsActiveTrue(id)).thenReturn(Optional.of(user));
+                when(userRepository.existsByEmail("duplicado@email.com")).thenReturn(true);
+
+                assertThrows(EmailAlreadExistsEception.class,
+                                () -> userServices.updateUser(id, new UpdateUserDto("Nome", "duplicado@email.com", null, "123", null)));
+                verify(userRepository).existsByEmail("duplicado@email.com");
+        }
+
+        @Test
+        void deveAtualizarDadosEListarComFiltrosEPaginacao() {
+                UUID id = UUID.randomUUID();
+                User user = new User();
+                user.setId(id);
+                user.setName("Antigo");
+                user.setEmail("antigo@email.com");
+                user.setPhone("111");
+                user.setActive(true);
+                user.setAddress(new java.util.HashSet<>());
+                when(userRepository.findByIdAndIsActiveTrue(id)).thenReturn(Optional.of(user));
+                when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+                var updated = userServices.updateUser(id, new UpdateUserDto("Novo", "antigo@email.com", "nova-senha", "222", null));
+                assertEquals("Novo", updated.name());
+                assertEquals("222", updated.phone());
+                assertNotEquals("nova-senha", user.getPassword());
+
+                Page<User> page = new PageImpl<>(List.of(user), PageRequest.of(0, 5), 1);
+                when(userRepository.findActiveUsers("Novo", "antigo", PageRequest.of(0, 5))).thenReturn(page);
+                var results = userServices.listAll("Novo", "antigo", PageRequest.of(0, 5));
+                assertEquals(1, results.getTotalElements());
+                assertEquals("Novo", results.getContent().get(0).name());
+                verify(userRepository).findActiveUsers("Novo", "antigo", PageRequest.of(0, 5));
         }
 
 }

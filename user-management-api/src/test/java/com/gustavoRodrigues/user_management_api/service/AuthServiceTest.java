@@ -121,4 +121,23 @@ class AuthServiceTest {
         verify(passwordEncoder).matches("123456", user.getPassword());
     }
 
+    @Test
+    void loginDeveFalharQuandoUsuarioNaoExiste() {
+        LoginRequestDto dto = new LoginRequestDto("ausente@email.com", "senha");
+        when(userServices.fetchByEmail(dto.email())).thenReturn(Optional.empty());
+        assertThrows(BadCredentialsException.class, () -> authService.login(dto));
+        verify(userServices).fetchByEmail(dto.email());
+        org.mockito.Mockito.verifyNoInteractions(passwordEncoder, jwtEncoder);
+    }
+
+    @Test
+    void loginDeveFalharQuandoUsuarioEstaInativo() {
+        LoginRequestDto dto = new LoginRequestDto("inativo@email.com", "senha");
+        User user = new User();
+        user.setActive(false);
+        when(userServices.fetchByEmail(dto.email())).thenReturn(Optional.of(user));
+        assertThrows(BadCredentialsException.class, () -> authService.login(dto));
+        org.mockito.Mockito.verifyNoInteractions(passwordEncoder, jwtEncoder);
+    }
+
 }
