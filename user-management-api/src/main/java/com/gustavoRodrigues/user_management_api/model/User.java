@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import com.gustavorodrigues.user_management_api.enums.RoleEnum;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

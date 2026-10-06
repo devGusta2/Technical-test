@@ -14,7 +14,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import com.gustavorodrigues.user_management_api.model.Address;
-import com.gustavorodrigues.user_management_api.model.Role;
 import com.gustavorodrigues.user_management_api.model.User;
 import com.gustavorodrigues.user_management_api.repository.AddressRepository;
 import com.gustavorodrigues.user_management_api.repository.UserRepository;

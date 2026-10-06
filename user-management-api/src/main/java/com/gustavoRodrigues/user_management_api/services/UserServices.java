@@ -1,6 +1,5 @@
 package com.gustavorodrigues.user_management_api.services;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;

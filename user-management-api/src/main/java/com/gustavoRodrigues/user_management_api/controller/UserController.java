@@ -1,6 +1,5 @@
 package com.gustavorodrigues.user_management_api.controller;
 
-import java.util.List;
 import java.util.UUID;
 
 import jakarta.validation.Valid;
