@@ -22,4 +22,5 @@ jobs:
           cache: maven
 
       - name: Run tests
+        working-directory: ./user-management-api
         run: mvn clean test
