@@ -26,6 +26,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 
 import com.gustavorodrigues.user_management_api.dto.LoginRequestDto;
 import com.gustavorodrigues.user_management_api.dto.LoginResponseDto;
+import com.gustavorodrigues.user_management_api.enums.RoleEnum;
 import com.gustavorodrigues.user_management_api.model.Role;
 import com.gustavorodrigues.user_management_api.model.User;
 import com.gustavorodrigues.user_management_api.services.AuthService;
@@ -63,6 +64,7 @@ class AuthServiceTest {
         user.setEmail("gustavo@email.com");
         user.setPassword("123");
         user.setActive(true);
+        user.setRole(RoleEnum.USER);
         user.setRoles(Set.of(role));
 
         Jwt jwt = mock(Jwt.class);
@@ -108,6 +110,7 @@ class AuthServiceTest {
         user.setEmail("gustavo@gmail.com");
         user.setPassword("123456");
         user.setActive(true);
+        user.setRole(RoleEnum.USER);
         user.setRoles(Set.of(role));
 
         when(userServices.fetchByEmail(user.getEmail()))
