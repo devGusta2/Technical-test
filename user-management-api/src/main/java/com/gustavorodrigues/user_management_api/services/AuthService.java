@@ -30,13 +30,13 @@ public class AuthService {
 
     public ResponseEntity<LoginResponseDto> login(LoginRequestDto dto) {
         var user = userServices.fetchByEmail(dto.email());
-        if (!user.get().isActive()) {
-            throw new BadCredentialsException("Credenciais inválidas!");
-        }
+     
         if (user.isEmpty()) {
             throw new BadCredentialsException("Credenciais inválidas!");
         }
-
+           if (!user.get().isActive()) {
+            throw new BadCredentialsException("Credenciais inválidas!");
+        }
         if (!passwordEncoder.matches(dto.password(), user.get().getPassword())) {
             throw new BadCredentialsException("Credenciais inválidas");
         }
