@@ -5,8 +5,8 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.gustavorodrigues.user_management_api.Exceptions.AddresNotFoundException;
-import com.gustavorodrigues.user_management_api.Exceptions.InvalidCepException;
+import com.gustavorodrigues.user_management_api.exceptions.AddresNotFoundException;
+import com.gustavorodrigues.user_management_api.exceptions.InvalidCepException;
 import com.gustavorodrigues.user_management_api.client.viacep.ViaCepCliente;
 import com.gustavorodrigues.user_management_api.dto.CreateEnderecoDto;
 import com.gustavorodrigues.user_management_api.dto.EnderecoResponseDto;

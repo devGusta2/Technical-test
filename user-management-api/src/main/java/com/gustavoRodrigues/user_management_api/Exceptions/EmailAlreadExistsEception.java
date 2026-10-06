@@ -1,4 +1,4 @@
-package com.gustavorodrigues.user_management_api.Exceptions;
+package com.gustavorodrigues.user_management_api.exceptions;
 
 public class EmailAlreadExistsEception extends RuntimeException {
     public EmailAlreadExistsEception(String message){

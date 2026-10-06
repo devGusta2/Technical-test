@@ -33,7 +33,7 @@ O código da aplicação está em `user-management-api/src/main/java/com/gustavo
 - `model`: entidades JPA, incluindo usuário, endereço, perfil e campos auditáveis.
 - `config`: configurações de segurança, JWT, OpenAPI, JPA, cache, ViaCEP e criação inicial de perfis/administrador.
 - `client/viacep`: cliente HTTP da API ViaCEP.
-- `Exceptions`: exceções de domínio e tratamento global.
+- `exceptions`: exceções de domínio e tratamento global.
 
 ## Autenticação e autorização
 

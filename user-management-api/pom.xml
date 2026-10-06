@@ -9,7 +9,7 @@
 		<version>4.1.1</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.gustavoRodrigues</groupId>
+	<groupId>com.gustavorodrigues</groupId>
 	<artifactId>user-management-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name />

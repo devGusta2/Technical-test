@@ -1,4 +1,4 @@
-package com.gustavoRodrigues.user_management_api.service;
+package com.gustavorodrigues.user_management_api.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

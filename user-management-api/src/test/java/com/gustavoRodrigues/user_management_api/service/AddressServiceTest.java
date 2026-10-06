@@ -1,4 +1,4 @@
-package com.gustavoRodrigues.user_management_api.service;
+package com.gustavorodrigues.user_management_api.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -18,8 +18,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.gustavorodrigues.user_management_api.client.viacep.ViaCepCliente;
-import com.gustavorodrigues.user_management_api.Exceptions.AddresNotFoundException;
-import com.gustavorodrigues.user_management_api.Exceptions.InvalidCepException;
+import com.gustavorodrigues.user_management_api.exceptions.AddresNotFoundException;
+import com.gustavorodrigues.user_management_api.exceptions.InvalidCepException;
 import com.gustavorodrigues.user_management_api.dto.CreateEnderecoDto;
 import com.gustavorodrigues.user_management_api.dto.viacep.ViaCepResponse;
 import com.gustavorodrigues.user_management_api.model.Address;

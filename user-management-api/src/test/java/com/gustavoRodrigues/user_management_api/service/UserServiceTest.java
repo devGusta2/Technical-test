@@ -1,4 +1,4 @@
-package com.gustavoRodrigues.user_management_api.service;
+package com.gustavorodrigues.user_management_api.service;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,8 +8,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import com.gustavorodrigues.user_management_api.Exceptions.UserNotFoundException;
-import com.gustavorodrigues.user_management_api.Exceptions.EmailAlreadExistsEception;
+import com.gustavorodrigues.user_management_api.exceptions.UserNotFoundException;
+import com.gustavorodrigues.user_management_api.exceptions.EmailAlreadExistsEception;
 
 import com.gustavorodrigues.user_management_api.dto.CreateUserDto;
 import com.gustavorodrigues.user_management_api.dto.UpdateUserDto;
