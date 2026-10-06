@@ -85,12 +85,12 @@ public class AddressServiceTest {
         ad.setId(id);
         ad.setActive(true);
 
-        when(addressRepository.findById(id))
+        when(addressRepository.findByIdAndActiveTrue(id))
                 .thenReturn(Optional.of(ad));
 
         addresService.deactivate(id);
         assertFalse(ad.isActive());
-        verify(addressRepository).findById(id);
+        verify(addressRepository).findByIdAndActiveTrue(id);
         verify(addressRepository).save(ad);
 
     }

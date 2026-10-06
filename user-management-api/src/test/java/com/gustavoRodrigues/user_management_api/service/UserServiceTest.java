@@ -6,9 +6,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.server.ResponseStatusException;
+import com.gustavorodrigues.user_management_api.Exceptions.UserNotFoundException;
 
 import com.gustavorodrigues.user_management_api.dto.CreateUserDto;
 import com.gustavorodrigues.user_management_api.model.Role;
@@ -139,8 +139,9 @@ public class UserServiceTest {
                 user.setId(id);
                 user.setName("Gustavo");
                 user.setEmail("gustavo@gmail.com");
+                user.setActive(true);
 
-                when(userRepository.findById(id))
+                when(userRepository.findByIdAndActiveTrue(id))
                                 .thenReturn(Optional.of(user));
 
                 User resultd = userServices.findById(id);
@@ -149,20 +150,23 @@ public class UserServiceTest {
                 assertEquals("Gustavo", resultd.getName());
                 assertEquals("gustavo@gmail.com", resultd.getEmail());
 
-                verify(userRepository).findById(id);
+                verify(userRepository).findByIdAndActiveTrue(id);
         }
 
         @Test
         void execaoQuandoNaoExisteUsuario() {
                 UUID id = UUID.randomUUID();
-                when(userRepository.findById(id))
+
+                when(userRepository.findByIdAndActiveTrue(id))
                                 .thenReturn(Optional.empty());
 
-                ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                UserNotFoundException exception = assertThrows(
+                                UserNotFoundException.class,
                                 () -> userServices.findById(id));
 
-                assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-                verify(userRepository).findById(id);
+                assertEquals("Usuário não encontrado!", exception.getMessage());
+
+                verify(userRepository).findByIdAndActiveTrue(id);
         }
 
         @Test
@@ -173,8 +177,9 @@ public class UserServiceTest {
                 user.setId(id);
                 user.setActive(true);
 
-                when(userRepository.findById(id))
+                when(userRepository.findByIdAndActiveTrue(id))
                                 .thenReturn(Optional.of(user));
+
                 when(userRepository.save(user))
                                 .thenReturn(user);
 
@@ -182,7 +187,8 @@ public class UserServiceTest {
 
                 assertFalse(user.isActive());
 
-                verify(userRepository).findById(id);
+                verify(userRepository).findByIdAndActiveTrue(id);
                 verify(userRepository).save(user);
         }
+
 }
