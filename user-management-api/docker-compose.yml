@@ -19,6 +19,7 @@ services:
     container_name: user-management-api
     restart: unless-stopped
     environment:
+      SPRING_PROFILES_ACTIVE: prod
       JWT_PRIVATE_KEY_PATH: /app/secrets/private.key
     volumes:
       - C:/Users/gugui/secrets/private.key:/app/secrets/private.key:ro
